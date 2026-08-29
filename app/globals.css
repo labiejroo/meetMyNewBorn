@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-sand text-ink font-sans antialiased;
+}
+a { @apply text-accentHover no-underline; }
+a:hover { @apply text-terraInk; }
+input:focus, select:focus, textarea:focus { outline: 2px solid #C98B84; outline-offset: 1px; }
