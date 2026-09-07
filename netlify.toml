@@ -1,0 +1,38 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Adapter Next.js dla Netlify. Honoruje `headers()` z next.config.mjs,
+# więc nagłówki generowane przy buildzie trafiają na produkcję.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# UWAGA co do frame-ancestors.
+#
+# Netlify NIE podstawia zmiennych środowiskowych w tym pliku — wpisane tu
+# ${PARENT_ORIGIN} trafiłoby do nagłówka dosłownie i zablokowało osadzenie.
+# Dlatego Content-Security-Policy ustawiamy w next.config.mjs, gdzie wartość
+# czytana jest ze zmiennej NEXT_PUBLIC_PARENT_ORIGIN w czasie builda:
+#
+#   frame-ancestors 'self' ${NEXT_PUBLIC_PARENT_ORIGIN}
+#
+# Domena rodziny nie jest więc zapisana w kodzie ani w tym pliku. Ustaw ją
+# w Netlify → Site configuration → Environment variables i zbuduj ponownie.
+# Dwa źródła CSP dawałyby część wspólną obu polityk, dlatego tutaj go nie ma.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    # X-Frame-Options celowo pominięte: zna tylko DENY/SAMEORIGIN i kolidowałoby
+    # z osadzeniem na stronie rodzinnej. Rolę tę pełni frame-ancestors.
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
