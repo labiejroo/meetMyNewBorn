@@ -112,6 +112,21 @@ export function AdminReservationList({ reservations, includeArchived, onToggleAr
                       Mail wrócił: {reservation.bounce.reason}
                     </span>
                   )}
+
+                  {/*
+                    „Dostarczono" pokazujemy TYLKO gdy dostawca to potwierdził
+                    i nie ma żadnego ostrzeżenia.
+
+                    Brak tej plakietki NIE znaczy „nie doszło" — znaczy
+                    „jeszcze nie wiemy", a to zupełnie co innego i nie ma
+                    powodu tego komunikować. Wygląd stonowany, bo to
+                    informacja uspokajająca, nie sprawa wymagająca uwagi.
+                  */}
+                  {!reservation.bounce && reservation.mailDelivered && (
+                    <span className="mt-0.5 inline-flex w-fit items-center gap-1.5 rounded-lg border border-[rgba(0,0,0,.08)] bg-[rgba(0,0,0,.03)] px-2 py-1 text-[11.5px] font-medium text-muted2">
+                      Dostarczono
+                    </span>
+                  )}
                 </span>
               </button>
             </li>

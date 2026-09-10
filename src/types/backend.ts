@@ -66,6 +66,34 @@ export interface ApiAdminReservation {
   isPrivate: boolean;
   createdAt: string;
   updatedAt: string;
+
+  /**
+   * LOSY WYSŁANYCH MAILI.
+   *
+   * `emailDeliveryWarning` jest niepuste tylko wtedy, gdy coś poszło nie tak:
+   * wiadomość się odbiła albo odbiorca zgłosił ją jako spam. Backend NIE
+   * przysyła tu identyfikatora wiadomości SES-a, kodu SMTP ani rodzaju
+   * niepowodzenia — to zostaje w bazie, bo panel i tak by z tym nic nie zrobił.
+   *
+   * Pola są OPCJONALNE, bo starsza wersja backendu ich nie zwraca. Adapter ma
+   * traktować ich brak jak „nic się nie odbiło" — inaczej panel przestałby
+   * działać w oknie między wdrożeniem frontu a wdrożeniem API.
+   */
+  emailDeliveryWarning?: ApiEmailDeliveryWarning | null;
+  emailDeliveries?: ApiEmailDelivery[];
+}
+
+export interface ApiEmailDeliveryWarning {
+  type: "BOUNCE" | "COMPLAINT";
+  /** Typ maila (MailEventType), np. GUEST_CONFIRMED. Bywa pusty. */
+  mailType: string | null;
+  occurredAt: string | null;
+}
+
+export interface ApiEmailDelivery {
+  mailType: string | null;
+  status: "SENT" | "DELIVERED" | "COMPLAINED" | "BOUNCED";
+  occurredAt: string | null;
 }
 
 /** Termin widziany przez gospodarzy — z pełną historią, także odrzuconą. */

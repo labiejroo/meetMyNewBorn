@@ -147,7 +147,15 @@ export function ReservationEditor({ reservation, onClose, onSaved, onError }: Pr
       {reservation.bounce && (
         <div className="flex flex-col gap-1.5 rounded-[15px] border border-[rgba(196,104,92,.5)] bg-[rgba(196,104,92,.10)] px-4 py-3.5">
           <strong className="text-[13.5px] font-semibold text-terraInk">
-            Mail wrócił ({reservation.bounce.type === "hard" ? "twardy odrzut" : reservation.bounce.type === "soft" ? "chwilowy problem" : "skarga"})
+            {/*
+              Nagłówek mówi, CO SIĘ STAŁO, bez żargonu. Wcześniej stało tu
+              „twardy odrzut / chwilowy problem" — rozróżnienie, którego backend
+              świadomie nie wypuszcza do panelu, bo gospodarz w obu przypadkach
+              zrobi dokładnie to samo: zadzwoni.
+            */}
+            {reservation.bounce.type === "complaint"
+              ? "Wiadomość oznaczona jako spam"
+              : "Mail nie dotarł"}
           </strong>
           <span className="text-[12.5px] leading-snug text-ink2 [text-wrap:pretty]">
             {reservation.bounce.reason}

@@ -81,11 +81,17 @@ function seed(): MockDb {
       notes: "Będzie nas sześcioro, w tym dwoje dzieci.",
       adminNote: "Mail wrócił, trzeba zadzwonić.",
       guestVisible: true,
-      // Przypadek odbitego maila: docelowo wpada tu SES → SNS → lambda bounce-handler.
+      /*
+        Przypadek odbitego maila. Mock trzyma się teraz DOKŁADNIE tego, co
+        oddaje prawdziwe API: rodzaj kłopotu i gotowe zdanie, bez kodu SMTP.
+        Wcześniej udawał tu dane („550 5.1.1 user unknown"), których backend
+        celowo nie wypuszcza — a mock pokazujący więcej niż produkcja usypia
+        czujność przy projektowaniu widoku.
+      */
       bounce: {
-        type: "hard",
+        type: "bounce",
         bouncedAt: stamp(4),
-        reason: "Adres nie istnieje (550 5.1.1 user unknown).",
+        reason: "Nie udało się dostarczyć wiadomości e-mail.",
       },
       archived: false,
       source: "guest", createdAt: stamp(6), updatedAt: stamp(4),

@@ -1,8 +1,9 @@
 import { BOOKING_RANGE_END, addDays, nextSaturday, todayIso } from "@/lib/dates";
 import { mutateDb, newId, readDb } from "@/mocks/db";
+import { EMAIL_BOUNCE_MESSAGE } from "@/types";
 import type {
   AdminReservation, AdminReservationsQuery, ApiAdminReservation, ApiAdminVisitSlot,
-  CreateAdminReservationInput, CreateBlockedDateInput, ReservationStatus,
+  CreateAdminReservationInput, CreateBlockedDateInput, EmailBounce, ReservationStatus,
   UpdateReservationInput,
 } from "@/types";
 
@@ -22,6 +23,32 @@ function isArchived(r: AdminReservation): boolean {
 
 function sortByDate(a: AdminReservation, b: AdminReservation) {
   return a.dateStart < b.dateStart ? -1 : a.dateStart > b.dateStart ? 1 : 0;
+}
+
+/**
+ * Ostrzeżenie z API → kształt, który rozumie panel.
+ *
+ * Treść bierzemy z jednego słownika po naszej stronie, a nie z odpowiedzi
+ * backendu. Backend celowo nie przysyła zdania do wyświetlenia: gdyby
+ * przysyłał, komunikat dla gospodarza zmieniałby się przy każdej zmianie
+ * po stronie API i nikt nie zauważyłby tego przed wdrożeniem.
+ *
+ * Brak pola (starszy backend) i `null` znaczą to samo: nic się nie odbiło.
+ */
+function toEmailBounce(
+  warning: ApiAdminReservation["emailDeliveryWarning"],
+): EmailBounce | null {
+  if (!warning) return null;
+
+  const type = warning.type === "COMPLAINT" ? "complaint" : "bounce";
+
+  return {
+    type,
+    // Backend podaje czas zdarzenia; przy jego braku zostawiamy pusty ciąg,
+    // bo widok i tak pokazuje wyłącznie zdanie, a nie datę.
+    bouncedAt: warning.occurredAt ?? "",
+    reason: EMAIL_BOUNCE_MESSAGE[type],
+  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -74,8 +101,15 @@ function toAdminRow(slot: ApiAdminVisitSlot, reservation: ApiAdminReservation): 
     // Panel mówi „pokaż innym”, backend „ukryj” — ta sama decyzja odwrócona.
     guestVisible: !reservation.isPrivate,
     adminNote: reservation.adminNote,
-    // TODO: email delivery state comes with SES integration.
-    bounce: null,
+    bounce: toEmailBounce(reservation.emailDeliveryWarning),
+    /**
+     * „Dostarczono" pokazujemy WYŁĄCZNIE przy potwierdzeniu od dostawcy.
+     *
+     * Brak wpisów (starszy backend, wyłączone maile) daje `undefined`, a nie
+     * `false` — bo „nie wiemy" i „nie doszło" to dwa różne stany, a panel
+     * pokazuje je inaczej.
+     */
+    mailDelivered: reservation.emailDeliveries?.some((entry) => entry.status === "DELIVERED"),
     archived: false,
     source: "guest",
     createdAt: reservation.createdAt,

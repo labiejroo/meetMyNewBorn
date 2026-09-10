@@ -149,9 +149,21 @@ export function TurnstileField({ onToken, resetKey }: Props) {
           // Ta sama wartość sprawdzana po stronie serwera. Bez niej token
           // z innego formularza dałby się tu przenieść.
           action: ACTION,
-          // Wyzwanie pokazuje się tylko wtedy, gdy Cloudflare uzna to za
-          // potrzebne — dla większości gości nie pojawi się nic.
-          appearance: "interaction-only",
+          /**
+           * Widget widoczny ZAWSZE, także wtedy, gdy Cloudflare nie potrzebuje
+           * żadnej interakcji — gość zobaczy ramkę z „Zweryfikowano".
+           *
+           * Alternatywą jest "interaction-only": ochrona działa identycznie,
+           * ale nie widać jej wcale. Wybraliśmy wersję widoczną, żeby dało się
+           * gołym okiem stwierdzić, że zabezpieczenie żyje; bez tego jedynym
+           * sposobem sprawdzenia są logi CloudWatch albo konsola przeglądarki.
+           *
+           * POWRÓT TO JEDNO SŁOWO. Jeśli ramka okaże się zawadzać gościom —
+           * a adresatami są dziadkowie, dla których każdy dodatkowy element
+           * formularza to kolejna rzecz do rozważenia — wystarczy wpisać tu
+           * "interaction-only" i przebudować frontend. Nic poza tym.
+           */
+          appearance: "always",
           size: "flexible",
           theme: "auto",
           callback: (token: string) => {
