@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Work_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -9,6 +9,12 @@ const workSans = Work_Sans({ subsets: ["latin", "latin-ext"], weight: ["400", "5
 export const metadata: Metadata = {
   title: "Odwiedziny u Zoi",
   description: "Rezerwacja pierwszych odwiedzin u naszej córki Zoi",
+};
+
+// Tylko jasny wygląd. Kalendarz działa w iframe, który przeglądarka przyciemnia
+// niezależnie od strony rodzinnej, więc potrzebuje własnego "only light".
+export const viewport: Viewport = {
+  colorScheme: "only light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

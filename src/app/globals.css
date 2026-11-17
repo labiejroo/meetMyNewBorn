@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tylko jasny wygląd: blokuje automatyczne przyciemnianie w trybie ciemnym na Androidzie. */
+html { color-scheme: only light; }
+
 body {
   @apply bg-sand text-ink font-sans antialiased;
 }
